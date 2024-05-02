@@ -29,12 +29,19 @@ type PathRequest struct {
 }
 
 func (b *BatchController) migrate(ctx *gin.Context) {
-	var pathRequest PathRequest
+	dbConnect := ctx.GetHeader("db_connection")
 
+	var pathRequest PathRequest
+	b.service.CreateConnection(&dbConnect)
 	err := ctx.ShouldBindJSON(&pathRequest)
 	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
-	b.service.Migrate(pathRequest.Path)
-	ctx.JSON(http.StatusOK, gin.H{"path": pathRequest})
+	quantity, err := b.service.Migrate(&pathRequest.Path)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"quantity": quantity})
 }

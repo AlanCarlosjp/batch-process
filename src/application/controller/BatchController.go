@@ -29,10 +29,8 @@ type PathRequest struct {
 }
 
 func (b *BatchController) migrate(ctx *gin.Context) {
-	dbConnect := ctx.GetHeader("db_connection")
 
 	var pathRequest PathRequest
-	b.service.CreateConnection(&dbConnect)
 	err := ctx.ShouldBindJSON(&pathRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})

@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/google/uuid"
-	"invoice/process/src/infrastructure/db"
+	"gorm.io/gorm"
 	"invoice/process/src/model/entity"
 	"log"
 	"os"
@@ -12,12 +12,12 @@ import (
 )
 
 type BatchService struct {
-	db *db.DbConnection
+	db *gorm.DB
 }
 
-func NewBatchService() *BatchService {
+func NewBatchService(db *gorm.DB) *BatchService {
 	return &BatchService{
-		db: db.NewDbConnectionBase(),
+		db: db,
 	}
 }
 
@@ -41,13 +41,10 @@ func (b *BatchService) Migrate(path *string) (any, error) {
 	}
 	for _, order := range orders {
 		fmt.Println(order)
+		b.db.Save(order)
 	}
 
 	return len(orders), nil
-}
-
-func (b *BatchService) CreateConnection(db_connection *string) {
-	db.NewDbConnection(*db_connection)
 }
 
 func convertToOrder(record []string) entity.Order {
